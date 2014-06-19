@@ -117,7 +117,7 @@
                     let indexAssignExpr = assign indexVarExpr (constant -1) 
                     let lengthExpr = arrayLength arrayVarExpr 
                     let getItemExpr = arrayIndex arrayVarExpr indexVarExpr
-                    let exprs' = assign context.CurrentVarExpr getItemExpr :: context.Exprs
+                    let exprs' = assign context.CurrentVarExpr getItemExpr :: context.Exprs // here we still have the lambda of our loop. For doubles, we need to not lose that context.
                     let checkBoundExpr = equal indexVarExpr lengthExpr 
                     let brachExpr = ifThenElse checkBoundExpr (``break`` context.BreakLabel) (block [] exprs') 
                     let loopExpr = loop (block [] [addAssign indexVarExpr (constant 1); brachExpr; context.AccExpr]) context.BreakLabel context.ContinueLabel 
@@ -417,17 +417,22 @@
 
         let rec compileToSequential (queryExpr : QueryExpr) (optimize : Expression -> Expression) : Expression = 
             match queryExpr with
-            | Sum (queryExpr') ->
+            | Sum (queryExpr') -> // This doesn't quite match Linq sum for doubles
                 let t = queryExpr'.Type
                 let finalVarExpr = var "___final___" t
                 let accVarExpr = var "___acc___" t
-                let initExpr = assign accVarExpr (``default`` t)
-                let accExpr = addAssign accVarExpr finalVarExpr
+                let initExpr1 = assign accVarExpr (``default`` t)
+                let initExpr2 = assign finalVarExpr (``default`` t)
+                let accExpr = 
+                    match queryExpr'.Type with
+                    | t when t = typedefof<double> -> addAssignSpecial accVarExpr finalVarExpr
+                    | _ -> addAssign accVarExpr finalVarExpr
+
                 let context = { CurrentVarExpr = finalVarExpr; AccVarExpr = accVarExpr; BreakLabel = breakLabel (); ContinueLabel = continueLabel (); 
-                                InitExprs = [initExpr]; AccExpr = accExpr; CombinerExpr = empty; ReturnExpr = accVarExpr; 
+                                InitExprs = [initExpr1; initExpr2]; AccExpr = accExpr; CombinerExpr = empty; ReturnExpr = accVarExpr;
                                 VarExprs = [finalVarExpr; accVarExpr]; Exprs = []; ReductionType = ReductionType.Sum }
                 let expr = compileToSeqPipeline queryExpr' context optimize
-                expr 
+                expr
             | Count (queryExpr') ->
                 let t = queryExpr'.Type
                 let accVarExpr = var "___cnt___" typeof<int>

@@ -11,14 +11,22 @@ namespace Nessos.LinqOptimizer.Core
         // F# friendly Expression functions 
         let empty = Expression.Empty()
         let ``default`` t = Expression.Default(t)
+
         let block (varExprs : seq<ParameterExpression>) (exprs : seq<Expression>) = 
             Expression.Block(varExprs, exprs) :> Expression
+
         let tryfinally bodyExpr finallyExpr = 
             Expression.TryFinally(bodyExpr, finallyExpr)
-        let assign leftExpr rightExpr = 
-            Expression.Assign(leftExpr, rightExpr) :> Expression
-        let addAssign leftExpr rightExpr = 
-            Expression.AddAssign (leftExpr, rightExpr) :> Expression
+        let assign target source = 
+            Expression.Assign(target, source) :> Expression
+
+        let addAssign accumulator valueToAdd = 
+            Expression.AddAssign (accumulator, valueToAdd) :> Expression
+        
+        /// <summary>a special adder for summing double lists</summary>
+        let addAssignSpecial accumulator valueToAdd = 
+            Expression.AddAssignChecked (accumulator,  valueToAdd) :> Expression
+
         let subAssign leftExpr rightExpr =
             Expression.SubtractAssign(leftExpr, rightExpr) :> Expression
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Nessos.LinqOptimizer.Core;
+﻿using Nessos.LinqOptimizer.Core;
 
 namespace Nessos.LinqOptimizer.Base
 {
@@ -28,7 +24,7 @@ namespace Nessos.LinqOptimizer.Base
     /// </summary>
     public class QueryExprVoid : IQueryExpr
     {
-        private QueryExpr _expr;
+        private readonly QueryExpr _expr;
         /// <summary>
         /// The expression representing the query.
         /// </summary>
@@ -50,7 +46,7 @@ namespace Nessos.LinqOptimizer.Base
     /// <typeparam name="T">The type of the query.</typeparam>
     public class QueryExpr<T> : IQueryExpr<T>
     {
-        private QueryExpr _expr;
+        private readonly QueryExpr _expr;
         /// <summary>
         /// The expression representing the query.
         /// </summary>

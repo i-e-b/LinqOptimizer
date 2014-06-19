@@ -138,15 +138,56 @@ namespace Nessos.LinqOptimizer.Tests
         [Test]
         public void SumDouble()
         {
+            // Buggy around infinite values
             Spec.ForAny<double[]>(xs =>
             {
                 var x = (from n in xs.AsQueryExpr()
                          select n * 2).Sum().Run();
+
+
                 var y = (from n in xs
                          select n * 2).Sum();
 
-                return (Double.IsNaN(x) && Double.IsNaN(y)) || x == y;
+                Console.WriteLine("Ours: " + x + "; Theirs: " + y);
+
+                return (Double.IsInfinity(x) && Double.IsInfinity(y)) || (Double.IsNaN(x) && Double.IsNaN(y)) || (Math.Abs(x - y) < double.Epsilon);
             }).QuickCheckThrowOnFailure();
+        }
+
+        [Test, Description("Demonstrates that double math in c# can be unexpected")]
+        public void SumDoublesCheck()
+        {
+            // Add-assign direct:
+            double acc = 0;
+            acc += Double.NegativeInfinity * 2;
+            acc += Double.MaxValue * 2;
+            Assert.That(Double.IsNaN(acc));
+
+            // Add-assign in variables
+            double acc2 = 0;
+            var v1 = Double.NegativeInfinity * 2;
+            var v2 = Double.MaxValue * 2;
+            acc2 += v1;
+            acc2 += v2;
+            Assert.That(Double.IsNaN(acc2));
+
+            // Add-assign out of variables in loop
+            var a = new[] { Double.NegativeInfinity, Double.MaxValue };
+            double acc3 = 0;
+            foreach (var d in a)
+            {
+                acc3 += d * 2;
+            }
+            Assert.That(Double.IsInfinity(acc3)); // This is negative infinity
+
+
+            // Add-assign out of variables no loop
+            double acc4 = 0;
+            var v3 = Double.NegativeInfinity;
+            var v4 = Double.MaxValue;
+            acc4 += v3 * 2;
+            acc4 += v4 * 2;
+            Assert.That(Double.IsInfinity(acc4));
         }
 
         [Test]

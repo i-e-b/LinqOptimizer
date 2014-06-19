@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Nessos.LinqOptimizer.Base;
 using Nessos.LinqOptimizer.Core;
 using QExpr = Nessos.LinqOptimizer.Core.QueryExpr;
@@ -80,7 +78,7 @@ namespace Nessos.LinqOptimizer.CSharp
         /// <returns>The result of the query.</returns>
         public static TQuery Run<TQuery>(this IQueryExpr<TQuery> query)
         {
-            return query.Compile<TQuery>().Invoke();
+            return query.Compile().Invoke();
         }
 
         /// <summary>
@@ -92,7 +90,7 @@ namespace Nessos.LinqOptimizer.CSharp
         /// <returns>The result of the query.</returns>
         public static TQuery Run<TQuery>(this IQueryExpr<TQuery> query, bool enableNonPublicMemberAccess)
         {
-            return query.Compile<TQuery>(enableNonPublicMemberAccess).Invoke();
+            return query.Compile(enableNonPublicMemberAccess).Invoke();
         }
 
         /// <summary>
